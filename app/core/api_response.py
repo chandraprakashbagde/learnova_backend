@@ -1,18 +1,136 @@
-from typing import Any, Literal
-from pydantic import BaseModel
+from typing import List, Dict
+from fastapi.responses import JSONResponse
+from pydantic_core import ValidationError, PydanticCustomError
+
+FIELD_NAMES = {
+    "f_name": "First Name",
+    "l_name": "Last Name",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "role": "Role",
+    "cpassword": "Confirm Password"
+}
+
+def custome_validation_error(field: str, message: str):
+   return ValidationError.from_exception_data(
+        title="Validation Error",
+        line_errors=[
+            {
+                "type": PydanticCustomError(
+                    "custome-validation-error",
+                    message
+                ),
+                "loc": (field,),
+                "input": "",
+            }
+    ])
+
+def SuccessResp(message: str = None, data=None):
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": True,
+            "message": message,
+            "data":data
+        }
+    )
+
+def ErrorResp(message: str = None, data=None):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "status": False,
+            "message": message,
+            "data":data
+        }
+    )
+
+def FieldErrorResp(errors: Dict[str, str]=[],field: str=None, message: str=None, jsnorsp=True):
+    errs = errors
+
+    if field != None and message != None:
+        errs = {
+            field:message
+        }
+
+    rspDct = {
+                "status": False,
+                "errors": errs,
+            }
+
+    if jsnorsp ==True:
+        return JSONResponse(
+            status_code=422,
+            content=rspDct
+        )
+    else:
+        return rspDct
+
+async def validation_exception_handler(exc):
+    formatted_errors = {}
+    print(exc.errors())
+    for error in exc.errors():
+
+        field = error["loc"][-1]
+
+        field_name = FIELD_NAMES.get(field, field)
+
+        error_type = error["type"]
+
+        message = error["msg"]
 
 
-class ApiError(BaseModel):
-    field: str | None = None
-    code: str
-    message: str
-    scope: Literal["field", "global"] = "global"
+        # =========================
+        # Custom Friendly Messages
+        # =========================
+
+        if error_type == "string_too_short":
+
+            min_length = error["ctx"]["min_length"]
+
+            message = (
+                f"{field_name} should have at least "
+                f"{min_length} characters"
+            )
 
 
-class ApiResponse(BaseModel):
-    success: bool
-    message: str
-    code: str | None = None
-    scope: Literal["field", "global"] = "global"
-    data: Any = None
-    errors: list[ApiError] = []
+        elif error_type == "string_too_long":
+
+            max_length = error["ctx"]["max_length"]
+
+            message = (
+                f"{field_name} should not exceed "
+                f"{max_length} characters"
+            )
+
+        elif error_type == "missing":
+
+            message = f"{field_name} is required"
+
+        elif error_type == "enum":
+
+            expected_values = error["ctx"]["expected"]
+
+            cleaned_values = (
+                expected_values
+                .replace("'", "")
+            )
+
+            message = f"{field_name} must be {cleaned_values}"
+
+        elif error_type == "json_invalid":
+            message = "Invalid JSON format in request body"
+            field = "body"
+
+        elif error_type == "value_error":
+
+            message = f"Invalid value for {field_name}"
+
+        elif error_type == "string_pattern_mismatch":
+
+            message = message = message.replace("String", field_name)
+
+        formatted_errors[field] = message
+
+    return FieldErrorResp(errors=formatted_errors)

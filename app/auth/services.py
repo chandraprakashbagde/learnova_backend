@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.auth.schemas import UserCreate, UserOut, LoginUser
 from app.auth.models import User
 from app.auth.utilities import gen_password_hash, verify_password, create_tokens
+from app.core.api_response import ErrorResp, SuccessResp
 
 async def get_user_by_email(session: AsyncSession, email: str) -> UserOut | None:
     stmt = select(User).where(User.email==email)
@@ -17,11 +18,7 @@ async def reg_user(session: AsyncSession, user: UserCreate) -> UserOut:
     ext_usr = await get_user_by_email(session, email=user.email)
 
     if ext_usr != None:
-
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User with this email already exists",
-        )
+       return ErrorResp("User with this email already exists")
 
     user = User(
         name=user.name, 
@@ -35,7 +32,10 @@ async def reg_user(session: AsyncSession, user: UserCreate) -> UserOut:
     await session.commit()
     await session.refresh(user)
 
-    return user
+    return SuccessResp(
+        message="Registered successfully, verification link has been sent to your email.",
+        data=UserOut.model_validate(user).model_dump()
+    )
 
 async def autheticate_users(session: AsyncSession, username: str, password: str):
 

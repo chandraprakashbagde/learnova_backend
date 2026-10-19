@@ -9,12 +9,9 @@ from app.auth.utilities import create_tokens
 
 router = APIRouter(prefix="/auth", tags=["Authetication APIs"])
 
-@router.post("/register", )
+@router.post("/register")
 async def user(session:SessionDep, user: UserCreate):
-    usr = await reg_user(session, user);
-
-    if usr != None:
-        return RegSuccess(user=usr)
+    return await reg_user(session, user);
 
 @router.post("/login")
 async def login(session: SessionDep, credentials:OAuth2PasswordRequestForm = Depends()):

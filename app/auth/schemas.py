@@ -1,5 +1,6 @@
-from pydantic import EmailStr, BaseModel, Field, field_validator
+from pydantic import EmailStr, BaseModel, Field, field_validator, ConfigDict
 from enum import Enum
+from app.core.api_response import custome_validation_error
 import re
 
 
@@ -20,7 +21,8 @@ class UserBase(BaseModel):
     @classmethod
     def validate_phone(cls, value: str) -> str:
         if not re.fullmatch(r"[6-9]\d{9}", value):
-            raise ValueError(
+            raise custome_validation_error(
+                "phone",
                 "Phone number must be a valid 10-digit Indian mobile number"
             )
         return value 
@@ -31,22 +33,22 @@ class UserCreate(UserBase):
     @field_validator("password")
     def validate_password(cls, value: str) -> str:
             if len(value) < 8:
-                raise ValueError("Password must contain at least 8 characters")
+                raise custome_validation_error("password", "Password must contain at least 8 characters")
     
             if not any(char.isupper() for char in value):
-                raise ValueError("Password must contain at least one uppercase letter")
+                raise custome_validation_error("password", "Password must contain at least one uppercase letter")
     
             if not any(char.islower() for char in value):
-                raise ValueError("Password must contain at least one lowercase letter")
+                raise custome_validation_error("password", "Password must contain at least one lowercase letter")
     
             if not any(char.isdigit() for char in value):
-                raise ValueError("Password must contain at least one digit")
+                raise custome_validation_error("password", "Password must contain at least one digit")
     
             return value
 
 class UserOut(UserBase):
-    email_verfied: bool 
-    pass
+    email_verfied: bool = False
+    model_config = ConfigDict(from_attributes=True)
 
 class LoginUser(BaseModel):
     name: str
