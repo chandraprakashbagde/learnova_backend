@@ -11,7 +11,7 @@ class Qualifications(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
 
-    teachers_profile:Mapped[list["TeacherProfile"]] = relationship(secondary=teachers_qualifications, back_populates="qualifications")
+    teachers_profile:Mapped[list["TeacherProfile"]] = relationship(secondary=teachers_qualifications, back_populates="teachers_qualifications")
 
     def __repr__(self):
         return f"<Qualifications(id={self.id}, name={self.name}, created_at={self.created_at})>"
