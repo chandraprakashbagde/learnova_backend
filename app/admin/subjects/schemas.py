@@ -3,10 +3,6 @@ import re
 from app.core.api_response import custome_validation_error
 
 
-class SubjectOut(BaseModel):
-    id: int
-    name: str
-
 class CreateUpdateSubject(BaseModel):
     name: str
 

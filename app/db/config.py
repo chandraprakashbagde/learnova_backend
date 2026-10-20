@@ -12,7 +12,10 @@ async def get_db_session():
     try:
         yield session
     finally:
-        session.close()
+        # Must be awaited: AsyncSession.close() is a coroutine. Without it the
+        # pooled connection is never released and the engine hits its queue-pool
+        # limit (15) after ~15 requests, 500-ing every call that follows.
+        await session.close()
         print("db closed successfully")
 
 
