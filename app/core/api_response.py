@@ -1,6 +1,10 @@
-from typing import List, Dict
+
+from typing import Any
+
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pydantic_core import ValidationError, PydanticCustomError
+
 
 FIELD_NAMES = {
     "f_name": "First Name",
@@ -9,128 +13,128 @@ FIELD_NAMES = {
     "email": "Email",
     "password": "Password",
     "role": "Role",
-    "cpassword": "Confirm Password"
+    "cpassword": "Confirm Password",
 }
 
+
 def custome_validation_error(field: str, message: str):
-   return ValidationError.from_exception_data(
+    return ValidationError.from_exception_data(
         title="Validation Error",
         line_errors=[
             {
                 "type": PydanticCustomError(
-                    "custome-validation-error",
-                    message
+                    "custom_validation_error",
+                    message,
                 ),
                 "loc": (field,),
                 "input": "",
             }
-    ])
+        ],
+    )
 
-def SuccessResp(message: str = None, data=None):
+
+def SuccessResp(
+    message: str | None = None,
+    data: Any = None,
+):
     return JSONResponse(
         status_code=200,
         content={
             "status": True,
             "message": message,
-            "data":data
-        }
+            "data": jsonable_encoder(data),
+        },
     )
 
-def ErrorResp(message: str = None, data=None):
+
+def ErrorResp(
+    message: str | None = None,
+    data: Any = None,
+    status_code: int = 400,
+):
     return JSONResponse(
-        status_code=422,
+        status_code=status_code,
         content={
             "status": False,
             "message": message,
-            "data":data
-        }
+            "data": jsonable_encoder(data),
+        },
     )
 
-def FieldErrorResp(errors: Dict[str, str]=[],field: str=None, message: str=None, jsnorsp=True):
-    errs = errors
 
-    if field != None and message != None:
-        errs = {
-            field:message
-        }
+def FieldErrorResp(
+    errors: dict[str, str] | None = None,
+    field: str | None = None,
+    message: str | None = None,
+    jsnorsp: bool = True,
+):
+    errs = dict(errors) if errors else {}
 
-    rspDct = {
-                "status": False,
-                "errors": errs,
-            }
+    if field is not None and message is not None:
+        errs[field] = message
 
-    if jsnorsp ==True:
-        return JSONResponse(
-            status_code=422,
-            content=rspDct
-        )
-    else:
-        return rspDct
+    response_data = {
+        "status": False,
+        "errors": errs,
+    }
+
+    if not jsnorsp:
+        return response_data
+
+    return JSONResponse(
+        status_code=422,
+        content=jsonable_encoder(response_data),
+    )
+
 
 async def validation_exception_handler(exc):
     formatted_errors = {}
-    print(exc.errors())
+
     for error in exc.errors():
+        location = error.get("loc", ())
+        field = location[-1] if location else "body"
 
-        field = error["loc"][-1]
-
-        field_name = FIELD_NAMES.get(field, field)
-
-        error_type = error["type"]
-
-        message = error["msg"]
-
-
-        # =========================
-        # Custom Friendly Messages
-        # =========================
+        field_name = FIELD_NAMES.get(field, str(field))
+        error_type = error.get("type")
+        message = error.get("msg", "Invalid value")
 
         if error_type == "string_too_short":
-
-            min_length = error["ctx"]["min_length"]
-
+            min_length = error.get("ctx", {}).get("min_length")
             message = (
                 f"{field_name} should have at least "
                 f"{min_length} characters"
             )
 
-
         elif error_type == "string_too_long":
-
-            max_length = error["ctx"]["max_length"]
-
+            max_length = error.get("ctx", {}).get("max_length")
             message = (
                 f"{field_name} should not exceed "
                 f"{max_length} characters"
             )
 
         elif error_type == "missing":
-
             message = f"{field_name} is required"
 
         elif error_type == "enum":
+            expected_values = error.get("ctx", {}).get("expected")
 
-            expected_values = error["ctx"]["expected"]
-
-            cleaned_values = (
-                expected_values
-                .replace("'", "")
-            )
-
-            message = f"{field_name} must be {cleaned_values}"
+            if expected_values:
+                cleaned_values = expected_values.replace("'", "")
+                message = f"{field_name} must be {cleaned_values}"
+            else:
+                message = f"Invalid value for {field_name}"
 
         elif error_type == "json_invalid":
-            message = "Invalid JSON format in request body"
             field = "body"
+            message = "Invalid JSON format in request body"
 
         elif error_type == "value_error":
-
             message = f"Invalid value for {field_name}"
 
         elif error_type == "string_pattern_mismatch":
+            message = message.replace("String", field_name)
 
-            message = message = message.replace("String", field_name)
-
-        formatted_errors[field] = message
+        # Keep the first error for each field.
+        formatted_errors.setdefault(field, message)
 
     return FieldErrorResp(errors=formatted_errors)

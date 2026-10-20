@@ -1,4 +1,4 @@
-from pydantic import EmailStr, BaseModel, Field, field_validator, ConfigDict
+from pydantic import EmailStr, BaseModel, Field, field_validator, model_validator, ConfigDict
 from enum import Enum
 from app.core.api_response import custome_validation_error
 import re
@@ -29,6 +29,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str = Field(..., max_length=20)
+    cpassword: str = Field(..., max_length=20, description="Confirm password, must match password")
 
     @field_validator("password")
     def validate_password(cls, value: str) -> str:
@@ -45,6 +46,15 @@ class UserCreate(UserBase):
                 raise custome_validation_error("password", "Password must contain at least one digit")
     
             return value
+
+    @model_validator(mode="after")
+    def validate_confirm_password(self) -> "UserCreate":
+        if self.password != self.cpassword:
+            raise custome_validation_error(
+                "cpassword",
+                "Passwords do not match"
+            )
+        return self
 
 class UserOut(UserBase):
     email_verfied: bool = False

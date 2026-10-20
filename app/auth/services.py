@@ -18,7 +18,7 @@ async def reg_user(session: AsyncSession, user: UserCreate) -> UserOut:
     ext_usr = await get_user_by_email(session, email=user.email)
 
     if ext_usr != None:
-       return ErrorResp("User with this email already exists")
+       return ErrorResp("User with this email already exists", status_code=status.HTTP_409_CONFLICT)
 
     user = User(
         name=user.name, 

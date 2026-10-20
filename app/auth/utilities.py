@@ -21,7 +21,6 @@ def create_access_token(data: dict, expires_delta: timedelta=None):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp":expire})
-    print(to_encode)
     return jwt.encode(to_encode, setting.SECRET_KEY, algorithm=setting.ALGORITHM)
 
 async def create_tokens(session: AsyncSession, user:User):

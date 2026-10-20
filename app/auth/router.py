@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from app.db.config import SessionDep
 from app.auth.schemas import UserOut, UserCreate, LoginUser, RegSuccess
 from app.auth.services import reg_user, autheticate_users
-from app.auth.dependancies import validate_token
+from app.auth.dependancies import get_logged_in_user_info
 from app.auth.utilities import create_tokens
 
 router = APIRouter(prefix="/auth", tags=["Authetication APIs"])
@@ -36,6 +36,10 @@ async def login(session: SessionDep, credentials:OAuth2PasswordRequestForm = Dep
 
     return response
 
+@router.get("/role")
+async def get_role(user = Depends(get_logged_in_user_info)):
+    return user["role"]
+
 @router.get("/me")
-async def me(user = Depends(validate_token)):
+async def me(user = Depends(get_logged_in_user_info)):
     return user
