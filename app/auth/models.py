@@ -4,6 +4,7 @@ from sqlalchemy import String, Enum as SqlAlchemyEnum, Integer, Boolean, DateTim
 from app.auth.schemas import Role
 from datetime import datetime, timezone
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -18,6 +19,8 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
     refresh_tokens:Mapped[list["RefreshToken"]] = relationship("RefreshToken", back_populates="user")
+
+    teachers_profile: Mapped["TeacherProfile"] = relationship("TeacherProfile", back_populates="user")
 
     def __repr__(self):
         return f"""<User(

@@ -1,11 +1,13 @@
 from pydantic import BaseModel, Field, EmailStr, field_validator
 from enum import Enum
 
-class AccountStatus(str, Enum):
-    PENDING = "Pending"
-    APPROVED = "Approved"
-    CHANGE_REQUESTED = "Change Requested"
-    REJECTED = "Rejected"
+class VerificationStatus(str, Enum):
+    ACCOUNT_CREATED = "ACCOUNT_CREATED"
+    PROFILE_COMPLETED = "PROFILE_COMPLETED"
+    DOCUMENTS_PENDING = "DOCUMENTS_PENDING"
+    UNDER_VERIFICATION = "UNDER_VERIFICATION"
+    ACTION_REQUIRED = "ACTION_REQUIRED"
+    VERIFIED = "VERIFIED"
 
 class TeacherBase(BaseModel):
     first_name:str 
@@ -32,5 +34,4 @@ class TeacherCreate(TeacherBase):
         return value
 
 class TeacherOut(TeacherBase):
-    is_verfied: bool = False
-    account_status:AccountStatus
+    verification_status:VerificationStatus

@@ -7,6 +7,14 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from app.db.base import Base
+
+## Admin Module
+from app.admin.subjects.models import *
+
+## Teachers
+from app.teacher.profile.models import *
+
+
 from app.auth.models import *
 
 # this is the Alembic Config object, which provides
