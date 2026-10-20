@@ -12,7 +12,7 @@ class Subject(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     deleted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
-    teachers_profile: Mapped[list["TeacherProfile"]] = relationship(secondary=teachers_subject, back_populates="teachers_subjects")
+    teachers_profile: Mapped[list["TeacherProfile"]] = relationship(secondary=teachers_subject, back_populates="subjects")
 
     
     def __repr__(self):

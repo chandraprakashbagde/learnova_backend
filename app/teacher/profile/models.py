@@ -13,6 +13,13 @@ teachers_subject = Table(
     Column("teacher_id", ForeignKey("teachers_profile.id"), primary_key=True)
 )
 
+teachers_qualifications = Table(
+    "teachers_qualifications",
+    Base.metadata,
+    Column("qualifications_id", ForeignKey("qualifications.id"), primary_key=True),
+    Column("teacher_id", ForeignKey("teachers_profile.id"), primary_key=True)
+)
+
 class TeacherProfile(Base):
     __tablename__ = "teachers_profile"
 
@@ -26,6 +33,7 @@ class TeacherProfile(Base):
     user: Mapped["User"] = relationship("User", back_populates="teachers_profile")
 
     teachers_subjects: Mapped[list["Subject"]] = relationship(secondary=teachers_subject, back_populates="teachers_profile")
+    teachers_qualifications:Mapped[list["Qualifications"]] = relationship(secondary=teachers_qualifications, back_populates="teachers_profile")
 
     def __repr__(self):
         return f"<TeacherProfile(id={self.id}, name={f"{self.first_name} {self.last_name}, email={self.email}"} )>"

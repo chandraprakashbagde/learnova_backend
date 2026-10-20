@@ -10,6 +10,7 @@ from app.db.base import Base
 
 ## Admin Module
 from app.admin.subjects.models import *
+from app.admin.qaulifications.models import *
 
 ## Teachers
 from app.teacher.profile.models import *
