@@ -51,3 +51,5 @@ def require_role(role: Role):
 # Require an Admin role. Equivalent to require_role(Role.ADMIN) but kept as a
 # named dependency for readability at admin endpoints.
 require_admin = require_role(Role.ADMIN)
+require_teacher = require_role(Role.TEACHER)
+require_student = require_role(Role.STUDENT)

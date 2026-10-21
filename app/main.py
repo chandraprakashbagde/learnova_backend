@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.api_response import validation_exception_handler
 from app.auth.router import router as auth_router
 from app.admin.router import router as admin_router
+from app.teacher.router import router as teacher_router
 
 app = FastAPI()
 
@@ -25,4 +26,5 @@ async def exceptionHandler(request: Request, exc: RequestValidationError):
     return await validation_exception_handler(exc)
 
 app.include_router(auth_router) 
-app.include_router(admin_router)
+# app.include_router(admin_router)
+app.include_router(teacher_router)

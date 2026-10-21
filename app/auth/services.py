@@ -2,8 +2,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from app.auth.schemas import UserCreate, UserOut, LoginUser
+from app.auth.schemas import UserCreate, UserOut, LoginUser, Role
 from app.auth.models import User
+from app.teacher.profile.models import TeacherProfile
 from app.auth.utilities import gen_password_hash, verify_password, create_tokens
 from app.core.api_response import ErrorResp, SuccessResp
 
@@ -29,6 +30,10 @@ async def reg_user(session: AsyncSession, user: UserCreate) -> UserOut:
     )
 
     session.add(user)
+
+    if user.role == Role.TEACHER.value:
+        user.teachers_profile = TeacherProfile(exprience=1, bio="TEST TEACHER BIO")
+
     await session.commit()
     await session.refresh(user)
 

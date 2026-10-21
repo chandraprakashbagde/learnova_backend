@@ -35,3 +35,17 @@ class TeacherCreate(TeacherBase):
 
 class TeacherOut(TeacherBase):
     verification_status:VerificationStatus
+
+
+class TeacherQualifications(BaseModel):
+    qualifications_id:int
+    specialization: str
+    institution_name: str
+    passing_year: int
+
+class TeacherProfileUpdate(BaseModel):
+    exprience: int 
+    bio: str 
+    verification_status: VerificationStatus = VerificationStatus.DOCUMENTS_PENDING 
+    subjects: list[int] = []
+    qaulifications: list[TeacherQualifications] = []

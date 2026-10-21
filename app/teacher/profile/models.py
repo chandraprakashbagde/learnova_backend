@@ -5,19 +5,23 @@ from sqlalchemy import String, Integer, DateTime, Boolean, Enum as SQLAlchemyEnu
 from datetime import datetime, timezone
 from app.auth.models import User
 
-
 teachers_subject = Table(
     "teachers_subjects",
     Base.metadata,
     Column("subject_id", ForeignKey("subjects.id"), primary_key=True),
-    Column("teacher_id", ForeignKey("teachers_profile.id"), primary_key=True)
+    Column("teacher_id", ForeignKey("teachers_profile.id"), primary_key=True),
+    Column("created_at",DateTime,nullable=False,default=lambda: datetime.now(timezone.utc))
 )
 
 teachers_qualifications = Table(
     "teachers_qualifications",
     Base.metadata,
-    Column("qualifications_id", ForeignKey("qualifications.id"), primary_key=True),
-    Column("teacher_id", ForeignKey("teachers_profile.id"), primary_key=True)
+    Column("qualifications_id", ForeignKey("qualifications.id"), primary_key=True, nullable=False),
+    Column("teacher_id", ForeignKey("teachers_profile.id"), primary_key=True, nullable=False),
+    Column("specialization", String(100), nullable=False),
+    Column("institution_name", String(100), nullable=False),
+    Column("passing_year", Integer, nullable=False),
+    Column("created_at", DateTime, nullable=False, default=lambda:datetime.now(timezone.utc))
 )
 
 class TeacherProfile(Base):
