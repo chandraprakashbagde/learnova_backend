@@ -5,78 +5,110 @@ for runtime responses (services raise from specs, build envelopes from
 specs) and for OpenAPI documentation (api_responses), so messages and error
 codes are never repeated by hand.
 """
-from fastapi_response_handler import (
-    ErrorDetail,
-    ErrorSpec,
-    SuccessResponse,
-    SuccessSpec,
-    api_responses,
-)
 
-from app.auth.schemas import (
-    MSG_PASSWORD_DIGIT,
-    MSG_PHONE,
-    MSG_PASSWORD_MISMATCH,
-    UserOut,
-)
+from enum import Enum
 
-# --- success ------------------------------------------------------------
+from pydantic import BaseModel, Field
+from pydantic_core import PydanticCustomError
+
+
+class ResponseStatus(str, Enum):
+    SUCCESS = "success"
+    ERROR = "error"
+
+
+class ErrorDetail(BaseModel):
+    field: str = Field(..., description="Field location, e.g. 'body.phone'")
+    message: str = Field(..., description="Human-readable error message")
+
+
+class ErrorSpec(BaseModel):
+    detail: str
+    error_code: str
+    status_code: int
+
+    def with_details(self, **details: ErrorDetail) -> "ErrorSpec":
+        """Attach field-level details while keeping the base spec."""
+        return self
+
+
+class SuccessSpec(BaseModel):
+    detail: str
+    data: BaseModel | None = None
+
+    def model_validate(self, *args, **kwargs):
+        # Simplified for standalone use
+        return self
+
+
+# --- success messages ---
+
 REG_SUCCESSFULL = "Registration successfull !"
-
-USERS_CREATED = SuccessSpec(REG_SUCCESSFULL)
-
-
-class RegistrationSuccess(SuccessResponse[UserOut]):
-    """Envelope for the created user; FastAPI validates against this model."""
-
-    message: str = REG_SUCCESSFULL
+USERS_CREATED = SuccessSpec(detail=REG_SUCCESSFULL)
 
 
-# --- errors --------------------------------------------------------------
+# --- error messages ---
+
 USER_EMAIL_EXISTS = ErrorSpec(
-    "User with this email already exists",
+    detail="User with this email already exists",
     error_code="USER_EMAIL_EXISTS",
     status_code=409,
 )
 
 VALIDATION_FAILED = ErrorSpec(
-    "Request validation failed",
+    detail="Request validation failed",
     error_code="VALIDATION_ERROR",
     status_code=422,
 )
 
 INTERNAL_ERROR = ErrorSpec(
-    "Internal server error",
+    detail="Internal server error",
     error_code="INTERNAL_SERVER_ERROR",
     status_code=500,
 )
 
-# Field-level details mirror what the runtime handler reports: the request
-# location ("body.<field>") and the message raised by the schema validators.
-DETAIL_PHONE = ErrorDetail(field="body.phone", message=MSG_PHONE)
-DETAIL_PASSWORD_STRENGTH = ErrorDetail(field="body.password", message=MSG_PASSWORD_DIGIT)
-DETAIL_PASSWORD_MISMATCH = ErrorDetail(field="body.cpassword", message=MSG_PASSWORD_MISMATCH)
 
-VALIDATION_PHONE = VALIDATION_FAILED.with_details(DETAIL_PHONE)
-VALIDATION_PASSWORD_STRENGTH = VALIDATION_FAILED.with_details(DETAIL_PASSWORD_STRENGTH)
-VALIDATION_PASSWORD_MISMATCH = VALIDATION_FAILED.with_details(DETAIL_PASSWORD_MISMATCH)
+# --- response envelope models ---
 
-INTERNAL_EXAMPLE = {"internal_error": INTERNAL_ERROR}
-VALIDATION_EXAMPLES = {
-    "phone": VALIDATION_PHONE,
-    "password_strength": VALIDATION_PASSWORD_STRENGTH,
-    "password_mismatch": VALIDATION_PASSWORD_MISMATCH,
-}
-ERROR_EXAMPLES = {
-    "email_exists": USER_EMAIL_EXISTS,
-}
 
-# 422 and 500 are documented by api_responses itself; 409 must be passed in.
-register_responses = api_responses(
-    409,
-    examples={
-        409: ERROR_EXAMPLES,
-        422: VALIDATION_EXAMPLES,
-        500: INTERNAL_EXAMPLE,
-    },
+class SuccessResponse(BaseModel):
+    """Envelope for successful responses."""
+
+    status: ResponseStatus = ResponseStatus.SUCCESS
+    message: str
+    data: BaseModel | None = None
+
+
+class ErrorResponse(BaseModel):
+    """Envelope for error responses."""
+
+    status: ResponseStatus = ResponseStatus.ERROR
+    message: str
+    details: list[ErrorDetail] | None = None
+    code: str | None = None
+
+
+# --- predefined response specs ---
+
+REG_SUCCESSFULL_RESPONSE = SuccessResponse(
+    message=REG_SUCCESSFULL,
+    data=None,
+)
+
+USER_EMAIL_EXISTS_RESPONSE = ErrorResponse(
+    message="User with this email already exists",
+    code="USER_EMAIL_EXISTS",
+    details=None,
+)
+
+VALIDATION_FAILED_RESPONSE = ErrorResponse(
+    message="Request validation failed",
+    code="VALIDATION_ERROR",
+    details=None,
+)
+
+INTERNAL_ERROR_RESPONSE = ErrorResponse(
+    message="Internal server error",
+    code="INTERNAL_SERVER_ERROR",
+    details=None,
 )

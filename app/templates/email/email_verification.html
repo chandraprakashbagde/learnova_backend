@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <title>Verify Your Learnova Account</title>
+</head>
+
+<body style="
+  margin: 0;
+  padding: 0;
+  background-color: #F1F3FF;
+  font-family: Arial, Helvetica, sans-serif;
+">
+
+  <!-- Main Wrapper -->
+  <table width="100%" cellpadding="0" cellspacing="0"
+    border="0" style="background-color: #F1F3FF; padding: 35px 12px;">
+
+    <tr>
+      <td align="center">
+
+        <!-- Email Container -->
+        <table width="100%" cellpadding="0" cellspacing="0"
+          border="0" style="
+            max-width: 600px;
+            background-color: #FFFFFF;
+            border-radius: 14px;
+            overflow: hidden;
+          ">
+
+          <!-- Header -->
+          <tr>
+            <td align="center" style="
+              background-color: #4F46E5;
+              padding: 35px 20px;
+            ">
+
+              <h1 style="
+                color: #FFFFFF;
+                font-size: 28px;
+                margin: 0;
+                font-weight: 700;
+              ">
+                🎓 Learnova
+              </h1>
+
+              <p style="
+                color: #E0E7FF;
+                font-size: 14px;
+                margin: 12px 0 0;
+              ">
+                Learn. Teach. Grow.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding: 35px 30px 20px;">
+
+              <h2 style="
+                color: #20213A;
+                font-size: 24px;
+                margin: 0 0 20px;
+              ">
+                Verify your email address
+              </h2>
+
+              <p style="
+                color: #555A70;
+                font-size: 15px;
+                line-height: 25px;
+              ">
+                Hello <strong>{{ user_name }}</strong>,
+              </p>
+
+              <p style="
+                color: #555A70;
+                font-size: 15px;
+                line-height: 25px;
+              ">
+                Welcome to Learnova! We're excited to have you
+                join our learning community as a
+                <strong>{{ user_role }}</strong>.
+              </p>
+
+              <p style="
+                color: #555A70;
+                font-size: 15px;
+                line-height: 25px;
+              ">
+                To get started, please verify your email address
+                by clicking the button below.
+              </p>
+
+              <!-- Verification Info -->
+              <table width="100%" cellpadding="0" cellspacing="0"
+                style="
+                  background-color: #EEF2FF;
+                  border-radius: 10px;
+                  margin: 25px 0;
+                ">
+                <tr>
+                  <td style="padding: 18px;">
+
+                    <p style="
+                      color: #4F46E5;
+                      font-size: 15px;
+                      font-weight: bold;
+                      margin: 0 0 8px;
+                    ">
+                      ✓ Your account is almost ready!
+                    </p>
+
+                    <p style="
+                      color: #555A70;
+                      font-size: 13px;
+                      line-height: 21px;
+                      margin: 0;
+                    ">
+                      Verify your email to activate your
+                      Learnova account and access your dashboard.
+                    </p>
+
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA Button -->
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding: 10px 0 25px;">
+
+                    <a href="{{ verification_url }}"
+                      target="_blank"
+                      style="
+                        display: inline-block;
+                        background-color: #4F46E5;
+                        color: #FFFFFF;
+                        text-decoration: none;
+                        padding: 15px 32px;
+                        border-radius: 8px;
+                        font-size: 15px;
+                        font-weight: bold;
+                      ">
+                      Verify My Email Address →
+                    </a>
+
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Expiry -->
+              <p style="
+                color: #64748B;
+                font-size: 13px;
+                line-height: 22px;
+              ">
+                <strong>Important:</strong> This verification
+                link will expire in
+                <strong>{{ expiry_minutes }} minutes</strong>.
+              </p>
+
+              <!-- Fallback Link -->
+              <p style="
+                color: #64748B;
+                font-size: 13px;
+                line-height: 22px;
+              ">
+                If the button doesn't work, copy and paste
+                the following link into your browser:
+              </p>
+
+              <p style="
+                font-size: 13px;
+                line-height: 22px;
+                word-break: break-all;
+              ">
+                <a href="{{ verification_url }}"
+                  style="color: #4F46E5;">
+                  {{ verification_url }}
+                </a>
+              </p>
+
+              <p style="
+                color: #64748B;
+                font-size: 13px;
+                line-height: 22px;
+                margin-top: 25px;
+              ">
+                If you didn't create a Learnova account,
+                you can safely ignore this email.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="
+              background-color: #F8FAFC;
+              padding: 25px 20px;
+            ">
+
+              <p style="
+                color: #4F46E5;
+                font-size: 15px;
+                font-weight: bold;
+                margin: 0 0 8px;
+              ">
+                Learnova — Learn. Teach. Grow.
+              </p>
+
+              <p style="
+                color: #94A3B8;
+                font-size: 12px;
+                margin: 0;
+                line-height: 20px;
+              ">
+                © 2026 Learnova. All rights reserved.
+              </p>
+
+              <p style="
+                color: #94A3B8;
+                font-size: 12px;
+                margin: 8px 0 0;
+              ">
+                This is an automated email.
+                Please do not reply.
+              </p>
+
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+
+  </table>
+
+</body>
+</html>

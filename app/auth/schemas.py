@@ -86,3 +86,9 @@ class LoginUser(BaseModel):
 class RegSuccess(BaseModel):
     message: str = "User created successfully"
     user: UserOut
+
+class EmailVerification(BaseModel):
+    user_name: str
+    user_role: Role
+    user_id: int
+    user_email: EmailStr = "chandraprakashbcca@gmail.com"

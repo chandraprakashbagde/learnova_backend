@@ -11,6 +11,8 @@ pwd_ctx = CryptContext(
     deprecated="auto",
 )
 
+class InvalidTokenException(Exception): pass;
+
 def gen_password_hash(passwod: str):
     return pwd_ctx.hash(passwod)
 
@@ -55,4 +57,26 @@ def decode_token(token: str):
     try:
         return jwt.decode(token, setting.SECRET_KEY, algorithms=setting.ALGORITHM)
     except JWTError:
+        return None
+
+async def create_email_verification_token(user_id: int):
+    to_encode = {
+        "sub": str(user_id), 
+        "type": "email_verify", 
+        "exp": datetime.now(timezone.utc) + timedelta(hours=1)
+    }
+    return jwt.encode(to_encode, setting.SECRET_KEY, algorithm=setting.ALGORITHM)
+
+async def verify_email_token(token: str):
+    try:
+        tokenize_info = jwt.decode(token, setting.SECRET_KEY, algorithms=setting.ALGORITHM)
+        print(tokenize_info)
+        if tokenize_info["type"] != "email_verify":
+            raise InvalidTokenException("Invalid token !")
+        
+        elif datetime.now(timezone.utc) >= datetime.fromtimestamp(timestamp=tokenize_info["exp"], tz=timezone.utc):
+            raise InvalidTokenException("Token has been expired")
+        return tokenize_info["sub"]
+    except Exception as ex:
+        print("Error: ", ex)
         return None
